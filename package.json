@@ -1,0 +1,32 @@
+{
+  "name": "toadtris",
+  "version": "1.0.0",
+  "description": "Tetris game built with React and ASP.NET Core",
+  "private": true,
+  "scripts": {
+    "frontend:install": "cd frontend/Toadtris && npm install",
+    "frontend:dev": "cd frontend/Toadtris && npm run dev",
+    "frontend:build": "cd frontend/Toadtris && npm run build",
+    "frontend:preview": "cd frontend/Toadtris && npm run preview",
+    "frontend:lint": "cd frontend/Toadtris && npm run lint",
+    "backend:restore": "cd backend && dotnet restore",
+    "backend:build": "cd backend && dotnet build",
+    "backend:run": "cd backend && dotnet run",
+    "backend:publish": "cd backend && dotnet publish -c Release -o ./bin/Release/publish",
+    "install": "npm run frontend:install",
+    "dev": "npm run frontend:dev",
+    "build": "npm run frontend:build && npm run backend:publish",
+    "docker:build": "docker-compose up --build",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "keywords": [
+    "tetris",
+    "game",
+    "react",
+    "dotnet"
+  ],
+  "author": "Julia",
+  "license": "MIT"
+}
