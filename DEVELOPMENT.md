@@ -84,7 +84,7 @@ Or use docker-compose directly:
 docker-compose up --build
 ```
 
-- Backend: http://localhost:5000
+- Backend: http://localhost:5001
 - Frontend: http://localhost:3000
 
 View logs:
