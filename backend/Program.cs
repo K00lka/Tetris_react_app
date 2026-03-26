@@ -48,6 +48,26 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Root endpoint with API information
+app.MapGet("/", () => Results.Ok(new 
+{ 
+    message = "Tetris Game API",
+    version = "1.0.0",
+    status = "running",
+    endpoints = new
+    {
+        health = "/health",
+        leaderboard = "/api/leaderboard",
+        leaderboardTop = "/api/leaderboard/top/{count}",
+        submitScore = "POST /api/leaderboard",
+        playerStats = "/api/players/{playerName}/scores",
+        gameConfig = "/api/game/config",
+        swagger = "/swagger/index.html"
+    }
+}))
+    .WithName("Root")
+    .WithOpenApi();
+
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
     .WithName("HealthCheck")
@@ -82,6 +102,9 @@ async Task<IResult> GetLeaderboard(TetrisDbContext db)
     var leaderboard = await db.Scores
         .OrderByDescending(s => s.Score)
         .Take(10)
+        .ToListAsync();
+
+    var result = leaderboard
         .Select((s, index) => new 
         { 
             rank = index + 1,
@@ -89,9 +112,9 @@ async Task<IResult> GetLeaderboard(TetrisDbContext db)
             score = s.Score,
             createdAt = s.CreatedAt
         })
-        .ToListAsync();
+        .ToList();
 
-    return Results.Ok(leaderboard);
+    return Results.Ok(result);
 }
 
 async Task<IResult> GetTopScores(TetrisDbContext db, int count)
@@ -102,6 +125,9 @@ async Task<IResult> GetTopScores(TetrisDbContext db, int count)
     var topScores = await db.Scores
         .OrderByDescending(s => s.Score)
         .Take(count)
+        .ToListAsync();
+
+    var result = topScores
         .Select((s, index) => new 
         { 
             rank = index + 1,
@@ -109,9 +135,9 @@ async Task<IResult> GetTopScores(TetrisDbContext db, int count)
             score = s.Score,
             createdAt = s.CreatedAt
         })
-        .ToListAsync();
+        .ToList();
 
-    return Results.Ok(topScores);
+    return Results.Ok(result);
 }
 
 async Task<IResult> SaveScore(TetrisDbContext db, ScoreEntry scoreEntry)
