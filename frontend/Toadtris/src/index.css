@@ -7,3 +7,12 @@
   border: 1px solid black;
   
 }
+.board{
+  border: 2px solid black;
+  user-select: none;
+  margin: auto;
+  width: fit-content;
+}
+h1 {
+  text-align: center;
+}
