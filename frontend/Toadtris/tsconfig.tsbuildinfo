@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/board.tsx","./src/components/cell.tsx","./src/components/types.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/board.tsx","./src/components/cell.tsx","./src/components/types.ts","./src/hooks/usetetris.ts","./src/hooks/usetetrisboard.ts","./src/hooks/useinterval.ts"],"errors":true,"version":"5.9.3"}
