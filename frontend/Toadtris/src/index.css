@@ -55,3 +55,16 @@ h1 {
 .cell.Z {
   background-color: red;
 }
+
+.upcoming {
+display: flex;
+flex-direction: row-reverse;
+justify-content: flex-end;
+gap: 10px;
+
+}
+
+.cell.hidden {
+  visibility: hidden;
+
+}
