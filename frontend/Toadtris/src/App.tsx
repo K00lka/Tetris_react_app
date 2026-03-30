@@ -5,13 +5,14 @@ import { useTetris } from './hooks/useTetris';
 
 
 function App() {
-  const { board, isPlaying, startGame } = useTetris();
+  const { board, isPlaying, startGame, score } = useTetris();
 
   return (
     <div className='App'>
       <h1>Toadtris Game</h1>
       <Board currentBoard={board} />
       <div className='controls'>
+        <h2>Score: {score}</h2>
         {isPlaying ? null : (<button onClick={startGame}>New Game</button>)}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useInterval } from './useinterval';
 import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, getEmptyBoard } from './useTetrisBoard';
-import { BoardShape, Block, BlockShape, SHAPES } from '../components/types';
+import { BoardShape, Block, BlockShape, SHAPES, EmptyCell } from '../components/types';
 
 enum TickSpeed {
     Normal = 800,
@@ -9,11 +9,29 @@ enum TickSpeed {
     Fast = 50,
 }
 
+function getPoints(numCleared: number): number {
+    switch (numCleared) {
+        case 0:
+            return 0;
+        case 1:
+            return 100;
+        case 2:
+            return 300;
+        case 3:
+            return 500;
+        case 4:
+            return 800;
+        default:
+            throw new Error('Invalid number of lines cleared');
+    }
+}
+
 export function useTetris() {
   const [upcomingBlocks, setUpcomingBlocks] = useState<Block[]>([]);
   const [isCommitting, setIsCommitting] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
+  const [score, setScore] = useState(0);
 
   const [
     { board, droppingRow, droppingColumn, droppingBlock, droppingShape },
@@ -29,8 +47,8 @@ export function useTetris() {
     
     setUpcomingBlocks(startingBlocks);
     setIsCommitting(false);
+    setScore(0);
     setIsPlaying(true);
-    setTickSpeed(TickSpeed.Normal);
     dispatchBoardState({ type: 'start' });
   }, [dispatchBoardState]);
 
@@ -50,11 +68,21 @@ export function useTetris() {
       droppingColumn
     );
 
-    
+    let numCleared = 0;
+    for (let row = BOARD_HEIGHT - 1; row >= 0; row--) {
+      if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {
+        numCleared++;
+        newBoard.splice(row, 1);  
+      }
+    }
 
     const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];
     const newBlock = newUpcomingBlocks.pop() as Block;
     newUpcomingBlocks.unshift(getRandomBlock());
+
+    setScore((prevScore) => prevScore + getPoints(numCleared));
+    setTickSpeed(TickSpeed.Normal);
+
 
     if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
       setIsPlaying(false);
@@ -62,6 +90,7 @@ export function useTetris() {
     } else {
       setTickSpeed(TickSpeed.Normal);
     }
+    
     setUpcomingBlocks(newUpcomingBlocks);
     dispatchBoardState({
       type: 'commit',
@@ -201,6 +230,7 @@ export function useTetris() {
     startGame,
     isPlaying,
     upcomingBlocks,
+    score,
   };
 }
 
