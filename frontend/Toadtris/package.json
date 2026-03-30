@@ -1,42 +1,18 @@
 {
-  "name": "toadtris",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "tetris-react-app",
+  "version": "1.0.0",
+  "npmrc": {
+    "legacy-peer-deps": true
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "frontend:lint": "cd frontend/Toadtris && eslint src --ext ts,tsx",
-    "frontend:lint:fix": "cd frontend/Toadtris && eslint src --ext ts,tsx --fix",
-    "backend:restore": "cd backend && dotnet restore",
-    "backend:build": "cd backend && dotnet build",
-    "backend:run": "cd backend && dotnet run",
-    "backend:publish": "cd backend && dotnet publish -c Release",
+    "install": "npm install --legacy-peer-deps",
+    "frontend:install": "cd frontend/Toadtris && npm install --legacy-peer-deps",
+    "frontend:build": "cd frontend/Toadtris && npm run build",
     "docker:build": "docker-compose build --no-cache",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
-  },
-  "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "docker:down": "docker-compose down"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "@types/node": "^24.12.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^9.39.4",
-    "eslint-config-react-app": "^7.0.1",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.4.0",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8.57.0",
-    "vite": "^8.0.1",
-    "vite-plugin-eslint": "^1.8.1"
+    "@types/react": "^19.2.14"
   }
 }

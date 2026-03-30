@@ -28,5 +28,8 @@
     "dotnet"
   ],
   "author": "Julia",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1"
+  }
 }
