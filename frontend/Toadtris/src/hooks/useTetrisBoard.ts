@@ -1,3 +1,4 @@
+
 import { Block, BoardShape, BlockShape, SHAPES, EmptyCell } from "../components/types"
 import { useReducer, Dispatch } from "react";
 
@@ -36,7 +37,68 @@ export function useTetrisBoard() : [BoardState, Dispatch<Action>] {
 
 type Action = {
     type: 'start' | 'drop' | 'commit' | 'move';
+    newBoard?: BoardShape;
+    newBlock?: Block;
+    isPressingLeft?: boolean;
+    isPressingRight?: boolean;
+    isRotating?: boolean;
 }
+
+
+export function getEmptyBoard(height = BOARD_HEIGHT): BoardShape {
+    return Array(height)
+        .fill(null)
+        .map(() => Array(BOARD_WIDTH).fill(EmptyCell.Empty));
+}
+
+export function getRandomBlock(): Block {
+    const blockValues = Object.values(Block);
+    return blockValues[Math.floor(Math.random() * blockValues.length)] as Block;
+}
+
+export function hasCollisions(
+    board: BoardShape,
+    currentShape: BlockShape,
+    row: number,
+    column: number
+): boolean {
+    let hasCollisions = false;
+    
+    currentShape
+        .filter((shapeRow) => shapeRow.some((isSet) => isSet))
+        .forEach((shapeRow: boolean[], rowIndex: number) => {
+            shapeRow.forEach((isSet: boolean, colIndex: number) => {
+                if (
+                    isSet &&
+                    (row + rowIndex >= board.length ||
+                    column + colIndex < 0 ||
+                    column + colIndex >= board[0].length ||
+                    board[row + rowIndex][column + colIndex] !== EmptyCell.Empty)
+                ) {
+                    hasCollisions = true;
+                }
+            });
+        });
+    
+    return hasCollisions;
+}
+
+function rotateBlock(shape: BlockShape): BlockShape {
+    const rows = shape.length;
+    const columns = shape[0].length;
+    const rotated: BlockShape = Array(rows)
+        .fill(null)
+        .map(() => Array(columns).fill(false));
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < columns; col++) {
+            rotated[col][rows - 1 - row] = shape[row][col];
+        }
+    }
+
+    return rotated;
+}
+
 
 function boardReducer(state: BoardState, action: Action): BoardState {
     let newState = {...state};
@@ -56,6 +118,20 @@ function boardReducer(state: BoardState, action: Action): BoardState {
             break;
         case 'commit':
         case 'move':
+            const rotatedShape = action.isRotating
+            ? rotateBlock(newState.droppingShape)
+            : newState.droppingShape;
+            let columnOffset = action.isPressingLeft ? -1 : 0;
+            columnOffset = action.isPressingRight ? 1 : columnOffset;
+            if (!hasCollisions(
+                newState.board, 
+                rotatedShape, 
+                newState.droppingRow, 
+                newState.droppingColumn + columnOffset)) {
+                newState.droppingShape = rotatedShape;
+                newState.droppingColumn += columnOffset;
+            }
+
             break;
         default:
             const unhandledType: never = action.type;
@@ -63,15 +139,4 @@ function boardReducer(state: BoardState, action: Action): BoardState {
     }
 
     return newState;
-}
-
-export function getEmptyBoard(height = BOARD_HEIGHT): BoardShape {
-    return Array(height)
-        .fill(null)
-        .map(() => Array(BOARD_WIDTH).fill(EmptyCell.Empty));
-}
-
-export function getRandomBlock(): Block {
-    const blockValues = Object.values(Block);
-    return blockValues[Math.floor(Math.random() * blockValues.length)] as Block;
 }

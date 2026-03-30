@@ -1,3 +1,11 @@
+.App{
+  display: grid;
+  grid-template-columns: 
+    "title ."
+    "game controls";
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .row {
   display: flex;
 }
