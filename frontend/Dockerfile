@@ -1,15 +1,13 @@
 # Build stage
-FROM node:20-alpine AS build
+FROM node:20-alpine AS frontend-build
 WORKDIR /app
 
 # Copy package files
-COPY Toadtris/package.json ./
-
-# Install dependencies
-RUN npm install
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
 
 # Copy source code
-COPY Toadtris/ .
+COPY . .
 
 # Build the application
 RUN npm run build
@@ -22,7 +20,7 @@ WORKDIR /app
 RUN npm install -g serve
 
 # Copy built application from build stage
-COPY --from=build /app/dist ./dist
+COPY --from=frontend-build /app/dist ./dist
 
 # Expose port
 EXPOSE 3000
