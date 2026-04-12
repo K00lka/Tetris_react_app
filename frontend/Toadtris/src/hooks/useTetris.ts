@@ -7,6 +7,39 @@ enum TickSpeed {
     Normal = 800,
     Sliding = 100,
     Fast = 50,
+    Level2 = 500,
+    Level3 = 400,
+    Level4 = 300,
+    Level5 = 200,
+}
+
+function levelUP(score: number): number {
+    if (score >= 5000) {
+        return 5;
+    } else if (score >= 2500) {
+        return 4;
+    } else if (score >= 1000) {
+        return 3;
+    } else if (score >= 500) {
+        return 2;
+    } else {
+        return 1;
+    }
+}
+
+function getTickSpeed(level: number): TickSpeed {
+    switch (level) {
+        case 5:
+            return TickSpeed.Level5;
+        case 4:
+            return TickSpeed.Level4;
+        case 3:
+            return TickSpeed.Level3;
+        case 2:
+            return TickSpeed.Level2;
+        default:
+            return TickSpeed.Normal;
+    }
 }
 
 function getPoints(numCleared: number): number {
@@ -27,211 +60,219 @@ function getPoints(numCleared: number): number {
 }
 
 export function useTetris() {
-  const [upcomingBlocks, setUpcomingBlocks] = useState<Block[]>([]);
-  const [isCommitting, setIsCommitting] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
-  const [score, setScore] = useState(0);
+    const [upcomingBlocks, setUpcomingBlocks] = useState<Block[]>([]);
+    const [isCommitting, setIsCommitting] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
+    const [score, setScore] = useState(0);
+    const [currentLevel, setCurrentLevel] = useState(1);
 
-  const [
-    { board, droppingRow, droppingColumn, droppingBlock, droppingShape },
-    dispatchBoardState,
-  ] = useTetrisBoard();
+    const [
+        { board, droppingRow, droppingColumn, droppingBlock, droppingShape },
+        dispatchBoardState,
+    ] = useTetrisBoard();
 
-  const startGame = useCallback(() => {
-    const startingBlocks = [
-      getRandomBlock(),
-      getRandomBlock(),
-      getRandomBlock(),
-    ];
-    
-    setUpcomingBlocks(startingBlocks);
-    setIsCommitting(false);
-    setScore(0);
-    setIsPlaying(true);
-    dispatchBoardState({ type: 'start' });
-  }, [dispatchBoardState]);
+    const startGame = useCallback(() => {
+        const startingBlocks = [
+            getRandomBlock(),
+            getRandomBlock(),
+            getRandomBlock(),
+        ];
 
-  const commitPosition = useCallback(() => {
-    if (!hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)) {
-      setIsCommitting(false);
-      setTickSpeed(TickSpeed.Normal);
-      return;
-    }
-
-    const newBoard = structuredClone(board) as BoardShape;
-    addShapeToBoard(
-      newBoard,
-      droppingBlock,
-      droppingShape,
-      droppingRow,
-      droppingColumn
-    );
-
-    let numCleared = 0;
-    for (let row = BOARD_HEIGHT - 1; row >= 0; row--) {
-      if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {
-        numCleared++;
-        newBoard.splice(row, 1);  
-      }
-    }
-
-    const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];
-    const newBlock = newUpcomingBlocks.pop() as Block;
-    newUpcomingBlocks.unshift(getRandomBlock());
-
-    setScore((prevScore) => prevScore + getPoints(numCleared));
-    setTickSpeed(TickSpeed.Normal);
-
-
-    if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
-      setIsPlaying(false);
-      setTickSpeed(null);
-    } else {
-      setTickSpeed(TickSpeed.Normal);
-    }
-    
-    setUpcomingBlocks(newUpcomingBlocks);
-    dispatchBoardState({
-      type: 'commit',
-      newBoard: [...getEmptyBoard(BOARD_HEIGHT - newBoard.length), ...newBoard],
-      newBlock,
-    });
-    setIsCommitting(false);
-  }, [
-    board,
-    dispatchBoardState,
-    droppingBlock,
-    droppingColumn,
-    droppingRow,
-    droppingShape,
-    upcomingBlocks,
-  ]);
-
-  const gameTick = useCallback(() => {
-    if (isCommitting) {
-      commitPosition();
-    } else if (
-      hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)
-    ) {
-      setTickSpeed(TickSpeed.Sliding);
-      setIsCommitting(true);
-    } else {
-      dispatchBoardState({ type: 'drop' });
-    }
-  }, [
-    board,
-    commitPosition,
-    dispatchBoardState,
-    droppingColumn,
-    droppingRow,
-    droppingShape,
-    isCommitting,
-  ]);
-
-  useInterval(() => {
-    if (!isPlaying) {
-      return;
-    }
-    gameTick();
-  }, tickSpeed);
-
-  useEffect(() => {
-    if (!isPlaying) {
-      return;
-    }
-
-    let isPressingLeft = false;
-    let isPressingRight = false;
-    let moveIntervalID: ReturnType<typeof setInterval> | undefined;
-
-    const updateMovementInterval = () => {
-      clearInterval(moveIntervalID);
-      dispatchBoardState({
-        type: 'move',
-        isPressingLeft,
-        isPressingRight,
-      });
-      moveIntervalID = setInterval(() => {
-        dispatchBoardState({
-          type: 'move',
-          isPressingLeft,
-          isPressingRight,
-        });
-      }, 300);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat) {
-        return;
-      }
-
-      if (event.key === 'ArrowDown') {
-        setTickSpeed(TickSpeed.Fast);
-      }
-
-      if (event.key === 'ArrowUp') {
-        dispatchBoardState({
-          type: 'move',
-          isRotating: true,
-        });
-      }
-
-      if (event.key === 'ArrowLeft') {
-        isPressingLeft = true;
-        updateMovementInterval();
-      }
-
-      if (event.key === 'ArrowRight') {
-        isPressingRight = true;
-        updateMovementInterval();
-      }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowDown') {
+        setUpcomingBlocks(startingBlocks);
+        setIsCommitting(false);
+        setScore(0);
+        setCurrentLevel(1);
+        setIsPlaying(true);
         setTickSpeed(TickSpeed.Normal);
-      }
+        dispatchBoardState({ type: 'start' });
+    }, [dispatchBoardState]);
 
-      if (event.key === 'ArrowLeft') {
-        isPressingLeft = false;
-        updateMovementInterval();
-      }
+    const commitPosition = useCallback(() => {
+        if (!hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)) {
+            setIsCommitting(false);
+            setTickSpeed(TickSpeed.Normal);
+            return;
+        }
 
-      if (event.key === 'ArrowRight') {
-        isPressingRight = false;
-        updateMovementInterval();
-      }
+        const newBoard = structuredClone(board) as BoardShape;
+        addShapeToBoard(
+            newBoard,
+            droppingBlock,
+            droppingShape,
+            droppingRow,
+            droppingColumn
+        );
+
+        let numCleared = 0;
+        for (let row = BOARD_HEIGHT - 1; row >= 0; row--) {
+            if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {
+                numCleared++;
+                newBoard.splice(row, 1);
+            }
+        }
+
+        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];
+        const newBlock = newUpcomingBlocks.pop() as Block;
+        newUpcomingBlocks.unshift(getRandomBlock());
+
+        const pointsGained = getPoints(numCleared);
+        const newScore = score + pointsGained;
+        const newLevel = levelUP(newScore);
+
+        setScore(newScore);
+        setCurrentLevel(newLevel);
+
+        if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
+            setIsPlaying(false);
+            setTickSpeed(null);
+        } else {
+            setTickSpeed(getTickSpeed(newLevel));
+        }
+
+        setUpcomingBlocks(newUpcomingBlocks);
+        dispatchBoardState({
+            type: 'commit',
+            newBoard: [...getEmptyBoard(BOARD_HEIGHT - newBoard.length), ...newBoard],
+            newBlock,
+        });
+        setIsCommitting(false);
+    }, [
+        board,
+        dispatchBoardState,
+        droppingBlock,
+        droppingColumn,
+        droppingRow,
+        droppingShape,
+        upcomingBlocks,
+        score,
+    ]);
+
+    const gameTick = useCallback(() => {
+        if (isCommitting) {
+            commitPosition();
+        } else if (
+            hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)
+        ) {
+            setTickSpeed(TickSpeed.Sliding);
+            setIsCommitting(true);
+        } else {
+            dispatchBoardState({ type: 'drop' });
+        }
+    }, [
+        board,
+        commitPosition,
+        dispatchBoardState,
+        droppingColumn,
+        droppingRow,
+        droppingShape,
+        isCommitting,
+    ]);
+
+    useInterval(() => {
+        if (!isPlaying) {
+            return;
+        }
+        gameTick();
+    }, tickSpeed);
+
+    useEffect(() => {
+        if (!isPlaying) {
+            return;
+        }
+
+        let isPressingLeft = false;
+        let isPressingRight = false;
+        let moveIntervalID: ReturnType<typeof setInterval> | undefined;
+
+        const updateMovementInterval = () => {
+            clearInterval(moveIntervalID);
+            dispatchBoardState({
+                type: 'move',
+                isPressingLeft,
+                isPressingRight,
+            });
+            moveIntervalID = setInterval(() => {
+                dispatchBoardState({
+                    type: 'move',
+                    isPressingLeft,
+                    isPressingRight,
+                });
+            }, 300);
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.repeat) {
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                setTickSpeed(TickSpeed.Fast);
+            }
+
+            if (event.key === 'ArrowUp') {
+                dispatchBoardState({
+                    type: 'move',
+                    isRotating: true,
+                });
+            }
+
+            if (event.key === 'ArrowLeft') {
+                isPressingLeft = true;
+                updateMovementInterval();
+            }
+
+            if (event.key === 'ArrowRight') {
+                isPressingRight = true;
+                updateMovementInterval();
+            }
+        };
+
+        const handleKeyUp = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowDown') {
+                setTickSpeed(getTickSpeed(currentLevel));
+            }
+
+            if (event.key === 'ArrowLeft') {
+                isPressingLeft = false;
+                updateMovementInterval();
+            }
+
+            if (event.key === 'ArrowRight') {
+                isPressingRight = false;
+                updateMovementInterval();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
+            clearInterval(moveIntervalID);
+            setTickSpeed(getTickSpeed(currentLevel));
+        };
+    }, [dispatchBoardState, isPlaying, currentLevel]);
+
+    const renderedBoard = structuredClone(board) as BoardShape;
+    if (isPlaying) {
+        addShapeToBoard(
+            renderedBoard,
+            droppingBlock,
+            droppingShape,
+            droppingRow,
+            droppingColumn
+        );
+    }
+
+    return {
+        board: renderedBoard,
+        startGame,
+        isPlaying,
+        upcomingBlocks,
+        score,
+        currentLevel,
     };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-      clearInterval(moveIntervalID);
-      setTickSpeed(TickSpeed.Normal);
-    };
-  }, [dispatchBoardState, isPlaying]);
-
-  const renderedBoard = structuredClone(board) as BoardShape;
-  if (isPlaying) {
-    addShapeToBoard(
-      renderedBoard,
-      droppingBlock,
-      droppingShape,
-      droppingRow,
-      droppingColumn
-    );
-  }
-
-  return {
-    board: renderedBoard,
-    startGame,
-    isPlaying,
-    upcomingBlocks,
-    score,
-  };
 }
 
 function addShapeToBoard(
