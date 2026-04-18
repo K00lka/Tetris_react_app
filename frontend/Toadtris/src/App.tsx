@@ -2,6 +2,8 @@
 import Board from './components/Board'
 import UpcomingBlocks from './components/UpcomingBlocks';
 import { useTetris } from './hooks/useTetris';
+import LogoutButton from './components/LogoutButton';
+import LoginButton from './components/LoginButton';
 
 
 function App() {
@@ -9,7 +11,7 @@ function App() {
 
   return (
     <div className='App'>
-      <h1>Toadtris Game</h1>
+      <div><h1>Toadtris Game</h1> <LoginButton /> <LogoutButton /></div>
       <Board currentBoard={board} />
       <div className='controls'>
         <h2>Score: {score}</h2>

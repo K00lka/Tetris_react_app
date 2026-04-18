@@ -68,3 +68,7 @@ gap: 10px;
   visibility: hidden;
 
 }
+
+.LoginButton, .LogoutButton {
+  margin: 10px;
+}
