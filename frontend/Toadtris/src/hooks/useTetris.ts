@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useInterval } from './useinterval';
 import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, getEmptyBoard } from './useTetrisBoard';
 import { BoardShape, Block, BlockShape, SHAPES, EmptyCell } from '../components/types';
-import { useAuth0, User } from '@auth0/auth0-react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 enum TickSpeed {
     Normal = 800,

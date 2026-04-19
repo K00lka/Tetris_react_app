@@ -17,10 +17,6 @@ public class LeaderboardController : ControllerBase
     public async Task<IActionResult> GetTop()
         => Ok(await _service.GetTopAsync());
 
-    [HttpGet("user")]
-    public async Task<IActionResult> GetUserTop([FromQuery] string userId)
-        => Ok(await _service.GetUserTopAsync(userId));
-
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] LeaderboardEntry entry)
     {
