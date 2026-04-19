@@ -1,9 +1,8 @@
-.App{
-  display: grid;
-  grid-template-columns: 
-    "title ."
-    "game controls";
-  grid-template-columns: repeat(3, 1fr);
+.App {
+  padding-top: 60px; /* Add space for the fixed navbar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .row {
@@ -15,11 +14,13 @@
   border: 1px solid black;
   
 }
-.board{
+.board {
   border: 2px solid black;
   user-select: none;
   margin: auto;
   width: fit-content;
+  background-color: rgb(200, 200, 200); 
+  margin-top: 20px;
 }
 h1 {
   text-align: center;
@@ -71,4 +72,56 @@ gap: 10px;
 
 .LoginButton, .LogoutButton {
   margin: 10px;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background-color: #f0f0f0;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.navbar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.navbar-buttons {
+  display: flex;
+  gap: 10px;
+}
+.cell:not(.Empty) {
+  border-radius: 6px; /* or whatever radius you prefer */
+}
+
+.main-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 40px;
+  min-width: 250px;
+}
+
+.leaderboard-container {
+  margin-top: 40px;
+  width: 100%;
 }

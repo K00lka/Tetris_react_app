@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useInterval } from './useinterval';
 import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, getEmptyBoard } from './useTetrisBoard';
 import { BoardShape, Block, BlockShape, SHAPES, EmptyCell } from '../components/types';
+import { useAuth0, User } from '@auth0/auth0-react';
 
 enum TickSpeed {
     Normal = 800,
@@ -59,13 +60,21 @@ function getPoints(numCleared: number): number {
     }
 }
 
+function generateAnonNick(): string | null {
+  const randomNumber = Math.floor(Math.random() * 10000);
+  return `Player${randomNumber}`;
+}
+
 export function useTetris() {
+    const { isAuthenticated, user } = useAuth0();
     const [upcomingBlocks, setUpcomingBlocks] = useState<Block[]>([]);
     const [isCommitting, setIsCommitting] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
     const [score, setScore] = useState(0);
     const [currentLevel, setCurrentLevel] = useState(1);
+
+    
 
     const [
         { board, droppingRow, droppingColumn, droppingBlock, droppingShape },
@@ -126,6 +135,23 @@ export function useTetris() {
         if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
             setIsPlaying(false);
             setTickSpeed(null);
+            const nickname = isAuthenticated
+            ? user?.nickname
+            : localStorage.getItem('anon_nick') || generateAnonNick();
+
+          if (!localStorage.getItem('anon_nick')) {
+            localStorage.setItem('anon_nick', nickname!);
+          }
+
+          fetch('/api/leaderboard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              score: newScore,
+              nickname,
+              userId: isAuthenticated && user ? user.sub : null,
+            }),
+          });
         } else {
             setTickSpeed(getTickSpeed(newLevel));
         }
@@ -292,3 +318,5 @@ function addShapeToBoard(
             });
         });
 }
+
+

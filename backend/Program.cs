@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<LeaderboardService>();
 
 // Add Entity Framework Core with SQLite
 builder.Services.AddDbContext<TetrisDbContext>(options =>
